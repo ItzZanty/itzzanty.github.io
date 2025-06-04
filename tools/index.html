@@ -1,22 +1,270 @@
 <!DOCTYPE html>
-<html lang="en-US">
-    <head>
-        <meta charset="utf-8"/>
-        <meta name="author" content="ItzZanty" />
-        <meta name="description" content="ItzZanty's official page"/>
-        <link rel="icon" href="favicon.ico"/>
-        <link rel="stylesheet" href="style.css"/>
-        <script src="script.js"></script>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diskrete Mathematik Explorer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Diskrete Mathematik Explorer</h1>
+            <div class="theme-toggle">
+                <button id="theme-toggle" class="btn btn--sm btn--outline">🌓 Theme</button>
+            </div>
+        </header>
 
-        <title>ItzZanty's Webpage</title>
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="graph-editor">Graph Editor</button>
+            <button class="tab-btn" data-tab="flow-networks">Fluss-Netzwerke</button>
+            <button class="tab-btn" data-tab="combinatorics">Kombinatorik</button>
+            <button class="tab-btn" data-tab="number-theory">Zahlentheorie</button>
+            <button class="tab-btn" data-tab="group-theory">Gruppentheorie</button>
+        </nav>
 
-    </head>
+        <main class="main-content">
+            <!-- Graph Editor Tab -->
+            <div id="graph-editor" class="tab-content active">
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <button id="add-node" class="btn btn--primary">Knoten hinzufügen</button>
+                        <button id="toggle-edge-mode" class="btn btn--secondary">Kanten-Modus</button>
+                        <button id="clear-graph" class="btn btn--outline">Graph löschen</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button id="find-bridges" class="btn btn--secondary">Brücken finden</button>
+                        <button id="find-components" class="btn btn--secondary">Komponenten</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button id="save-graph" class="btn btn--outline">Speichern</button>
+                        <button id="load-graph" class="btn btn--outline">Laden</button>
+                    </div>
+                </div>
+                
+                <div class="graph-container">
+                    <div id="cy" class="cytoscape-container"></div>
+                    <div class="graph-info">
+                        <div class="info-card">
+                            <h4>Informationen</h4>
+                            <p>Knoten: <span id="node-count">0</span></p>
+                            <p>Kanten: <span id="edge-count">0</span></p>
+                            <p>Komponenten: <span id="component-count">0</span></p>
+                        </div>
+                        <div class="instructions-card">
+                            <h4>Bedienung</h4>
+                            <ul>
+                                <li>Klick: Knoten erstellen</li>
+                                <li>Shift + Ziehen: Kante erstellen</li>
+                                <li>Ziehen: Graph verschieben</li>
+                                <li>Doppelklick: Element löschen</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <body>
-        
-        <h1>Header</h1>
-        <p>Paragraph</p>
+            <!-- Flow Networks Tab -->
+            <div id="flow-networks" class="tab-content">
+                <div class="flow-toolbar">
+                    <div class="toolbar-group">
+                        <button id="set-source" class="btn btn--primary">Quelle setzen</button>
+                        <button id="set-sink" class="btn btn--primary">Senke setzen</button>
+                        <button id="set-capacity" class="btn btn--secondary">Kapazität setzen</button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button id="run-ford-fulkerson" class="btn btn--primary">Ford-Fulkerson</button>
+                        <button id="step-algorithm" class="btn btn--secondary">Schritt für Schritt</button>
+                        <button id="reset-flow" class="btn btn--outline">Zurücksetzen</button>
+                    </div>
+                </div>
+                
+                <div class="flow-container">
+                    <div id="flow-cy" class="cytoscape-container"></div>
+                    <div class="flow-info">
+                        <div class="info-card">
+                            <h4>Fluss-Information</h4>
+                            <p>Maximaler Fluss: <span id="max-flow">0</span></p>
+                            <p>Aktuelle Quelle: <span id="current-source">Nicht gesetzt</span></p>
+                            <p>Aktuelle Senke: <span id="current-sink">Nicht gesetzt</span></p>
+                        </div>
+                        <div class="algorithm-steps">
+                            <h4>Algorithmus-Schritte</h4>
+                            <div id="algorithm-log"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Combinatorics Tab -->
+            <div id="combinatorics" class="tab-content">
+                <div class="combo-container">
+                    <div class="combo-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Permutationen & Kombinationen</h3>
+                                <div class="form-group">
+                                    <label class="form-label">n (Gesamtanzahl):</label>
+                                    <input type="number" id="combo-n" class="form-control" value="5" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">r (Auswahl):</label>
+                                    <input type="number" id="combo-r" class="form-control" value="3" min="0">
+                                </div>
+                                <button id="calculate-combo" class="btn btn--primary">Berechnen</button>
+                                <div id="combo-results" class="results-display"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="combo-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Taubenschlagprinzip</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Anzahl Objekte:</label>
+                                    <input type="number" id="pigeonhole-objects" class="form-control" value="10" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Anzahl Fächer:</label>
+                                    <input type="number" id="pigeonhole-holes" class="form-control" value="9" min="1">
+                                </div>
+                                <button id="demonstrate-pigeonhole" class="btn btn--primary">Demonstrieren</button>
+                                <div id="pigeonhole-visual" class="pigeonhole-container"></div>
+                            </div>
+                        </div>
+                    </div>
 
-    </body>
+                    <div class="combo-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Pascal'sches Dreieck</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Anzahl Reihen:</label>
+                                    <input type="number" id="pascal-rows" class="form-control" value="8" min="1" max="15">
+                                </div>
+                                <button id="generate-pascal" class="btn btn--primary">Generieren</button>
+                                <div id="pascal-triangle" class="pascal-display"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Number Theory Tab -->
+            <div id="number-theory" class="tab-content">
+                <div class="number-container">
+                    <div class="number-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Euklidischer Algorithmus</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Erste Zahl (a):</label>
+                                    <input type="number" id="euclidean-a" class="form-control" value="48" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Zweite Zahl (b):</label>
+                                    <input type="number" id="euclidean-b" class="form-control" value="18" min="1">
+                                </div>
+                                <button id="run-euclidean" class="btn btn--primary">GCD berechnen</button>
+                                <div id="euclidean-steps" class="algorithm-steps"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="number-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Modulare Arithmetik</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Zahl (a):</label>
+                                    <input type="number" id="mod-a" class="form-control" value="17" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Modul (m):</label>
+                                    <input type="number" id="mod-m" class="form-control" value="5" min="1">
+                                </div>
+                                <button id="calculate-mod" class="btn btn--primary">Berechnen</button>
+                                <div id="mod-results" class="results-display"></div>
+                                <div id="mod-visual" class="mod-circle"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="number-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Primfaktorzerlegung</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Zahl:</label>
+                                    <input type="number" id="prime-number" class="form-control" value="60" min="2">
+                                </div>
+                                <button id="factorize" class="btn btn--primary">Faktorisieren</button>
+                                <div id="prime-results" class="results-display"></div>
+                                <div id="factor-tree" class="factor-tree-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group Theory Tab -->
+            <div id="group-theory" class="tab-content">
+                <div class="group-container">
+                    <div class="group-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Cayley-Tabelle Generator</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Gruppentyp:</label>
+                                    <select id="group-type" class="form-control">
+                                        <option value="cyclic">Zyklische Gruppe Z_n</option>
+                                        <option value="multiplication">Multiplikative Gruppe (Z/nZ)*</option>
+                                        <option value="symmetric">Symmetrische Gruppe S_n</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Parameter (n):</label>
+                                    <input type="number" id="group-param" class="form-control" value="4" min="2" max="8">
+                                </div>
+                                <button id="generate-cayley" class="btn btn--primary">Tabelle generieren</button>
+                                <div id="cayley-table" class="cayley-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Untergruppen</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Element auswählen:</label>
+                                    <select id="subgroup-element" class="form-control">
+                                        <option value="">Erst Gruppe generieren</option>
+                                    </select>
+                                </div>
+                                <button id="generate-subgroup" class="btn btn--primary">Untergruppe erzeugen</button>
+                                <div id="subgroup-display" class="subgroup-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Gruppeneigenschaften</h3>
+                                <div id="group-properties" class="properties-display">
+                                    <p>Wählen Sie eine Gruppe aus, um ihre Eigenschaften zu sehen.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
 </html>
