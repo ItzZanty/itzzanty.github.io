@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi-Signal Ausbreitungssimulator mit Beugung und Interferenz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="py-16">
+            <h1>WiFi-Signal Ausbreitungssimulator</h1>
+            <p>Erweiterte elektromagnetische Simulationen mit Beugung und Interferenz</p>
+        </header>
+
+        <div class="simulator-layout">
+            <!-- Linkes Bedienfeld -->
+            <div class="left-panel">
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Modus Auswahl</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="form-group">
+                            <select id="mode-selector" class="form-control">
+                                <option value="draw-walls">Wände zeichnen</option>
+                                <option value="place-sources">Quellen platzieren</option>
+                                <option value="simulate">Simulieren</option>
+                                <option value="analyze">Analysieren</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Wand-Eigenschaften</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="form-group">
+                            <label class="form-label">Material</label>
+                            <select id="wall-material" class="form-control">
+                                <option value="drywall">Gipskarton (3.5/4.0 dB)</option>
+                                <option value="wood">Holz (6/8 dB)</option>
+                                <option value="brick">Ziegel (12/15 dB)</option>
+                                <option value="concrete">Beton (25/30 dB)</option>
+                                <option value="metal">Metall (35/40 dB)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dicke: <span id="thickness-value">200</span>mm</label>
+                            <input type="range" id="wall-thickness" min="5" max="400" value="200" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Quelle Konfiguration</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="form-group">
+                            <label class="form-label">Frequenz</label>
+                            <select id="source-frequency" class="form-control">
+                                <option value="2.4">2.4 GHz</option>
+                                <option value="5">5 GHz</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Leistung: <span id="power-value">20</span>mW</label>
+                            <input type="range" id="source-power" min="1" max="100" value="20" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phase: <span id="phase-value">0</span>°</label>
+                            <input type="range" id="source-phase" min="0" max="360" value="0" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Visualisierung</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="show-heatmap" checked> Signalstärke-Heatmap
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="show-interference" checked> Interferenzmuster
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="show-fresnel"> Fresnel-Zonen
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="show-diffraction"> Beugungsstrahlen
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="show-phase"> Phasenbeziehungen
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Simulation Steuerung</h3>
+                    </div>
+                    <div class="card__body">
+                        <button id="start-simulation" class="btn btn--primary btn--full-width mb-8">Simulation starten</button>
+                        <button id="stop-simulation" class="btn btn--secondary btn--full-width mb-8">Simulation stoppen</button>
+                        <button id="clear-all" class="btn btn--outline btn--full-width">Alles löschen</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Haupt-Canvas -->
+            <div class="main-canvas-container">
+                <div class="canvas-header flex justify-between items-center">
+                    <h3>Simulationsbereich (8m × 6m)</h3>
+                    <div class="status" id="simulation-status">Bereit</div>
+                </div>
+                <div class="canvas-wrapper">
+                    <canvas id="main-canvas" width="800" height="600"></canvas>
+                    <div id="cursor-info" class="cursor-info">Signal: -60 dBm</div>
+                </div>
+                <div class="canvas-footer">
+                    <div class="legend flex gap-16">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff0000"></div>
+                            <span>Stark (-30 dBm)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ffff00"></div>
+                            <span>Konstruktive Interferenz</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #0000ff"></div>
+                            <span>Destruktive Interferenz</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #000080"></div>
+                            <span>Schwach (-90 dBm)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rechtes Informationspanel -->
+            <div class="right-panel">
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Quellen Liste</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="sources-list">
+                            <p class="text-secondary">Keine Quellen platziert</p>
+                        </div>
+                        <div class="phase-controls">
+                            <button id="sync-phases" class="btn btn--sm btn--secondary">Phasen synchronisieren</button>
+                            <button id="anti-sync-phases" class="btn btn--sm btn--outline">Anti-Synchronisation</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Cursor Analyse</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="cursor-analysis">
+                            <p><strong>Position:</strong> <span id="cursor-pos">-</span></p>
+                            <p><strong>Signalstärke:</strong> <span id="cursor-signal">-</span></p>
+                            <p><strong>Interferenz:</strong> <span id="cursor-interference">-</span></p>
+                            <p><strong>Beugungsverlust:</strong> <span id="cursor-diffraction">-</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Leistungsmetriken</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="performance-metrics">
+                            <p><strong>Abdeckungsbereich:</strong> <span id="coverage-area">0%</span></p>
+                            <p><strong>Tote Zonen:</strong> <span id="dead-zones">0%</span></p>
+                            <p><strong>Durchschn. Signalqualität:</strong> <span id="avg-quality">-</span></p>
+                            <p><strong>Interferenzkoeffizient:</strong> <span id="interference-coeff">-</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Fresnel-Zonen Analyse</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="fresnel-analysis">
+                            <p><strong>Erste Zone Radius:</strong> <span id="first-zone-radius">-</span></p>
+                            <p><strong>Blockierungsgrad:</strong> <span id="blocking-percentage">-</span></p>
+                            <p><strong>Diffraktionseffekte:</strong> <span id="diffraction-effects">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
